@@ -1,10 +1,17 @@
 ---
 title: "Challenge 2: Spicing things up with ggplot2"
-author: "Add your name!"
-format: html
+author: "Aaron Krimer"
+output: 
+  html_document:
+    self_contained: true
+    code_folding: hide
+    toc: false
 editor: source
 embed-resources: true
 code-tools: true
+echo: true
+code-fold: true
+
 ---
 
 For this week's Challenge, you will have three different options to explore.
@@ -23,7 +30,33 @@ you would like to include, feel free to toss those in the YAML, too!
 Next, create a setup code chunk to load the packages and read in the
 `surveys.csv` data file exactly how you did in Lab 2.
 
+```{r}
+#| label: setup
+library(tidyverse)
+# Reading in the data
+surveys <- read_csv("data/surveys.csv")
+```
+```{r}
+#| label: boxplot
+# question 15
+
+ggplot(data = surveys, mapping = aes(x = species_id, y = weight)) +
+  geom_boxplot(outlier.shape = NA) +  # Rm outliers
+  geom_jitter(width = 0.2, color = "steelblue", alpha = 0.5) +  # jittered points w/ color/transparency
+  labs(
+    title = "Distribution of Weight by Species",
+    x = "Species",
+    y = "Weight (g)"  # y-axis label
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotating species names
+    axis.title.x = element_text(margin = margin(t = 10)),  # Adj x-axis margin
+    axis.title.y = element_text(margin = margin(r = 10))  # Adjust y-axis margin
+  )
+
+```
 Finally, create another code chunk and paste in your code from Question 14 or Question 15 in Lab 2 -- we will be modifying the box plot of weights by species!
+
 
 # Medium: Ridge Plots
 
@@ -36,6 +69,32 @@ for side-by-side density plots using `geom_density()`. Instead, we will need to
 make use of the `ggridges` package to create side-by-side density (ridge) plots.
 
 > **For this challenge you are to change your boxplots to ridge plots. You will need to install the `ggridges` package and explore the `geom_density_ridges()` function.**
+
+```{r}
+options(repos = c(CRAN = "https://cran.rstudio.com/"))
+#chat gpt suggested i use this line of code so i can render
+install.packages("ggridges")
+library(ggridges)
+
+```
+
+```{r}
+#| label: ridge-plot
+
+ggplot(data = surveys, mapping = aes(x = weight, y = species_id, fill = species_id)) +
+  geom_density_ridges(alpha = 0.7, scale = 1.5) +  # Ridge plots with transparency
+  labs(
+    title = "Distribution of Weight by Species (Ridge Plot)",
+    x = "Weight (g)",  
+    y = "Species"  
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotating x-axis text for clarity
+    axis.title.x = element_text(margin = margin(t = 10)),  # Adjusting x-axis margin
+    axis.title.y = element_text(margin = margin(r = 10))  # Adjusting y-axis margin
+  ) +
+  scale_fill_viridis_d()  # color
+```
 
 # Spicy: Exploring Color Themes
 
