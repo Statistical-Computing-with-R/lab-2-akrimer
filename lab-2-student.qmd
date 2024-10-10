@@ -1,10 +1,13 @@
 ---
 title: "Lab 2: Exploring Rodents with `ggplot2`"
-author: "Your name here!"
+author: "Aaron Krimer"
 format: html
 editor: source
 embed-resources: true
 code-tools: true
+echo: true
+code-fold: true
+
 ---
 
 # Part 1: GitHub Workflow
@@ -62,7 +65,7 @@ In the code chunk below, load in the packages necessary for your analysis. You s
 
 ```{r}
 #| label: setup
-
+library(tidyverse)
 ```
 
 # Data Context
@@ -101,15 +104,25 @@ represent:
 
 ```{r}
 #| label: load-data
+surveys <- read_csv("data/surveys.csv")
 
+# 2. rows and cols
+dim(surveys)
+
+# 3. description of data
+glimpse(surveys)
 ```
 
 **2. What are the dimensions (# of rows and columns) of these data?**
+Rows: 30,463
+Columns: 15
 
 <!-- You can either write code here or in the code chunk for #1, but I **must** see the code you used to address this question!  -->
 
 **3. What are the data types of the variables in this dataset?**
-
+chr  (7): species_id, sex, day_of_week, plot_type, genus, species, taxa
+dbl  (7): record_id, month, day, year, plot_id, hindfoot_length, weight
+date (1): date
 <!-- You can either write code here or in the code chunk for #1, but I **must** see the code you used to address this question!  -->
 
 # Exploratory Data Analysis with **`ggplot2`**
@@ -139,6 +152,22 @@ the $x$-axis) and `hindfoot_length` (on the $y$-axis).**
 ```{r}
 #| label: scatterplot
 
+ggplot(data = surveys, 
+       mapping = aes(x = weight, y = hindfoot_length)) +
+  geom_point(alpha = 0.5) +  # Adding transparency
+  facet_wrap(~ species_id) +  # Facetng by species
+  labs(
+    title = "Relationship Between Weight and Hindfoot Length by Species",
+    subtitle = "Hindfoot Length (mm)",  # Moving the y-axis label into the subtitle
+    x = "Weight (g)",
+    y = ""  
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5),  # Centering 
+    plot.subtitle = element_text(hjust = 0.5, margin = margin(b = 10)),  # Adjusting subtitle position
+    axis.title.x = element_text(margin = margin(t = 10)),  # Adding space to x-axis label
+    axis.title.y = element_blank()  # Removing y label
+  )
 ```
 
 We can see there are **a lot** of points plotted on top of each other. Let's try and modify this plot to extract more information from it.
@@ -169,6 +198,19 @@ It takes a larger cognitive load to read text that is rotated. It is common prac
 ```{r}
 #| label: boxplot
 
+ggplot(data = surveys, mapping = aes(x = species_id, y = weight)) +
+  geom_boxplot(outlier.shape = NA) +  # Rm outliers
+  geom_jitter(width = 0.2, color = "steelblue", alpha = 0.5) +  # jittered points w/ color/transparency
+  labs(
+    title = "Distribution of Weight by Species",
+    x = "Species",
+    y = "Weight (g)"  # y-axis label
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotating species names
+    axis.title.x = element_text(margin = margin(t = 10)),  # Adj x-axis margin
+    axis.title.y = element_text(margin = margin(r = 10))  # Adjust y-axis margin
+  )
 
 ```
 
@@ -215,7 +257,19 @@ Some people (and journals) prefer for boxplots to be stacked with a specific ori
 
 ```{r}
 #| label: rotated-boxplot
-
+ggplot(data = surveys, mapping = aes(x = weight, y = species_id)) +
+  geom_boxplot(outlier.shape = NA) +  # Removing outliers
+  geom_jitter(height = 0.2, color = "steelblue", alpha = 0.5) +  
+  labs(
+    title = "Distribution of Weight by Species",
+    x = "Weight (g)",  # Adjusted x-axis label
+    y = "Species"  # Adjusted y-axis label
+  ) +
+  theme(
+    axis.text.y = element_text(angle = 0),  
+    axis.title.x = element_text(margin = margin(t = 10)),  # Adjusting x-axis margin
+    axis.title.y = element_text(margin = margin(r = 10))  # Adjusting y-axis margin
+  )
 ```
 
 Notice how vertically stacked boxplots make the species labels more readable
@@ -248,12 +302,24 @@ might want to look up the help documentation for `aov()`.
 ```{r}
 #| label: anova
 
-species_mod <- aov()
+species_mod <- aov(weight ~ species_id, data = surveys)
 
 summary(species_mod)
 ```
 
 **18. Based on the results of the ANOVA F-test, draw a conclusion in context of the hypotheses. Make sure to cite appropriate output from above.**
+
+The F-value is 19916, which is extremely high, and the p-value is reported as < 2e-16, which is significantly smaller than the typical alpha level of 0.05.
+Given this very small p-value, we reject the null hypothesis which stated that the population mean weight is the same between all fourteen rodent species. Instead, we have evidence to support the alternative hypothesis suggesting that at least one rodent species has a different population mean weight.
+
+So, the ANOVA results indicate a statistically significant difference in the mean weights between the rodent species.
+
+
+
+
+
+
+
 
 
 # Lab 2 Submission
