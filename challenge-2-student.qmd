@@ -11,6 +11,9 @@ embed-resources: true
 code-tools: true
 echo: true
 code-fold: true
+execute:
+  message: false
+  warning: false
 
 ---
 
